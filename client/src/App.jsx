@@ -54,6 +54,28 @@
 
 // export default App
 
+// import React from "react";
+// import { Routes, Route } from "react-router-dom";
+// import Home from "./pages/home";
+// import Login from "./pages/login";
+// import ResetPassword from "./pages/resetPassword";
+// import EmailVerify from "./pages/emailVerify";
+// import Habits from "./pages/Habit";
+
+// const App = () => {
+//   return (
+//     <Routes>
+//       <Route path="/" element={<Home />} />
+//       <Route path="/login" element={<Login />} />
+//       <Route path="/email-verify" element={<EmailVerify />} />
+//       <Route path="/reset-password" element={<ResetPassword />} />
+//       <Route path="/habits" element={<Habits />} />
+//     </Routes>
+//   );
+// };
+
+// export default App;
+
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/home";
@@ -61,6 +83,8 @@ import Login from "./pages/login";
 import ResetPassword from "./pages/resetPassword";
 import EmailVerify from "./pages/emailVerify";
 import Habits from "./pages/Habit";
+import Challenge from "./pages/Challenge";
+import Analytics from "./pages/analytics"; 
 
 const App = () => {
   return (
@@ -70,6 +94,8 @@ const App = () => {
       <Route path="/email-verify" element={<EmailVerify />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/habits" element={<Habits />} />
+      <Route path="/challenges" element={<Challenge />} /> {/* ✅ NEW */}
+      <Route path="/analytics" element={<Analytics />} />
     </Routes>
   );
 };

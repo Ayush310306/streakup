@@ -130,6 +130,47 @@
 // app.listen(port, () => {
 //   console.log(`Server started on PORT: ${port}`);
 // });
+// import express from "express";
+// import cors from "cors";
+// import 'dotenv/config';
+// import cookieParser from "cookie-parser";
+// import connectDB from "./config/mongodb.js";
+// import authRoutes from "./routes/authRoutes.js";
+// import userroutes from "./routes/userroutes.js";
+// import habitRoutes from "./routes/habitroutes.js";
+
+// const app = express();
+// const port = process.env.PORT || 4000;
+
+// // Connect to MongoDB
+// connectDB();
+
+// // Middleware
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(cookieParser());
+
+// // ✅ CORS – must come BEFORE routes
+// app.use(cors({
+//   origin: 'http://localhost:5173', // your React frontend
+//   credentials: true,               // allow cookies
+//   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // allow PATCH
+// }));
+
+// // Test route
+// app.get('/', (req, res) => {
+//   res.send("API working. Homepage accessible without login.");
+// });
+
+// // Routes
+// app.use('/api/auth', authRoutes);     // Auth routes (signup/login)
+// app.use('/api/user', userroutes);     // User routes (profile, settings)
+// app.use('/api/habits', habitRoutes);  // Habit routes (get/add/complete)
+
+// // Start server
+// app.listen(port, () => {
+//   console.log(`Server started on PORT: ${port}`);
+// });
 import express from "express";
 import cors from "cors";
 import 'dotenv/config';
@@ -138,6 +179,7 @@ import connectDB from "./config/mongodb.js";
 import authRoutes from "./routes/authRoutes.js";
 import userroutes from "./routes/userroutes.js";
 import habitRoutes from "./routes/habitroutes.js";
+import groupRoutes from "./routes/groupRoutes.js"; // ✅ NEW
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -166,6 +208,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);     // Auth routes (signup/login)
 app.use('/api/user', userroutes);     // User routes (profile, settings)
 app.use('/api/habits', habitRoutes);  // Habit routes (get/add/complete)
+app.use('/api/groups', groupRoutes);  // ✅ Group routes (create/join/leaderboard)
 
 // Start server
 app.listen(port, () => {
