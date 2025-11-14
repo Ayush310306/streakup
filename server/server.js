@@ -173,6 +173,7 @@
 // });
 import express from "express";
 import cors from "cors";
+import "./cron/dailyReset.js";
 import 'dotenv/config';
 import cookieParser from "cookie-parser";
 import connectDB from "./config/mongodb.js";
@@ -197,6 +198,7 @@ app.use(cors({
   origin: 'http://localhost:5173', // your React frontend
   credentials: true,               // allow cookies
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"], // allow PATCH
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 // Test route

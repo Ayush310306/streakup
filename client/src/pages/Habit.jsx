@@ -1778,6 +1778,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AddHabit from "../componenets/AddHabit";
 import { appContent } from "../context/appContext"; // Adjust path if needed
+import { toast } from "react-toastify";
 
 // --- START: CompletionCalendar Component ---
 const CompletionCalendar = ({ completionHistory = [] }) => {
@@ -1904,7 +1905,7 @@ const Habits = () => {
         });
 
         const points = res.data.pointsAwarded;
-        alert(
+        toast.success(
           `${res.data.habit.title} completed! Current Streak: ${res.data.habit.streak} days. You earned ${points} points! 🎉`
         );
         setUserTotalPoints((prevPoints) => prevPoints + points);
@@ -1914,7 +1915,7 @@ const Habits = () => {
         "Error completing habit:",
         err.response ? err.response.data.message : err.message
       );
-      alert(err.response?.data?.message || "Failed to mark habit as complete");
+      toast.error(err.response?.data?.message || "Failed to mark habit as complete");
     }
   };
 
@@ -1924,10 +1925,10 @@ const Habits = () => {
       const updated = habits.filter((h) => h._id !== id);
       setHabits(updated);
       updateStats(updated);
-      alert("Habit deleted successfully");
+      toast.success("Habit deleted successfully");
     } catch (err) {
       console.error("Error deleting habit:", err);
-      alert("Failed to delete habit");
+      toast.error("Failed to delete habit");
     }
   };
 
@@ -1943,7 +1944,7 @@ const Habits = () => {
 
   // --- NAVIGATION BAR ---
   const Navigation = () => (
-    <nav className="navbar">
+    <nav className="navbar" style={{marginLeft:"-20px",marginRight:"-20px",marginTop: '-20px',marginBottom:'10px'}}>
       <div className="nav-left">
         <div className="logo-box">
           <Flame size={20} color="white" />

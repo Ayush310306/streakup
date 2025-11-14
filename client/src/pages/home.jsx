@@ -353,6 +353,16 @@ const StreakUp = () => {
                 } else {
                   setActiveTab(item.toLowerCase());
                 }
+                if(item.toLowerCase() === 'challenges') {
+                  navigate('/challenges'); // <- navigate to new page instead of inline Dashboard
+                } else {
+                  setActiveTab(item.toLowerCase());
+                }
+                if(item.toLowerCase() === 'analytics') {
+                  navigate('/analytics'); // <- navigate to new page instead of inline Dashboard
+                } else {
+                  setActiveTab(item.toLowerCase());
+                }
               }}
               className={`nav-btn ${activeTab === item.toLowerCase() ? 'active' : ''}`}
             >
@@ -409,14 +419,22 @@ const StreakUp = () => {
         Join thousands building better habits together.
       </p>
       <div className="hero-buttons">
-        <button className="primary-btn"><Play size={18} /> Start Your Journey</button>
+        
+          <div>
+            <button
+              onClick={() => navigate("/habits")}
+              className="primary-btn"
+            >
+              <Play size={18} /> Start Your Journey
+            </button>
+          </div>
       </div>
     </section>
   );
 
   const Dashboard = () => (
     <div className="dashboard">
-      <h2 className="section-title">Your Dashboard</h2>
+      {/* <h2 className="section-title">Your Dashboard</h2>
       <div className="habits-list">
         {habits.map((habit) => (
           <div key={habit.id} className="habit-card">
@@ -435,7 +453,7 @@ const StreakUp = () => {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 

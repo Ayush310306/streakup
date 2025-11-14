@@ -1,395 +1,274 @@
-// import express from 'express';
-// import Group from '../models/Group.js';
-// import User from '../models/User.js';
-// import userAuth from '../middleware/userAuth.js';
-
-// const router = express.Router();
-
-// // Generate random 6-digit code
-// const generateGroupCode = () => {
-//   return Math.floor(100000 + Math.random() * 900000).toString();
-// };
-
-// // CREATE a new group
-// router.post('/create', userAuth, async (req, res) => {
-//   try {
-//     const { groupName } = req.body;
-    
-//     if (!groupName) {
-//       return res.status(400).json({ success: false, message: 'Group name is required' });
-//     }
-
-//     // Get user details
-//     const user = await User.findById(req.userId);
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: 'User not found' });
-//     }
-
-//     // Generate unique group code
-//     let groupCode = generateGroupCode();
-//     let existingGroup = await Group.findOne({ groupCode });
-    
-//     // Ensure code is unique
-//     while (existingGroup) {
-//       groupCode = generateGroupCode();
-//       existingGroup = await Group.findOne({ groupCode });
-//     }
-
-//     // Create group with creator as first member
-//     const group = new Group({
-//       groupName,
-//       groupCode,
-//       createdBy: req.userId,
-//       members: [{
-//         userId: req.userId,
-//         username: user.username
-//       }]
-//     });
-
-//     await group.save();
-
-//     res.status(201).json({ 
-//       success: true, 
-//       group,
-//       message: `Group created successfully! Share code: ${groupCode}` 
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: 'Server error creating group' });
-//   }
-// });
-
-// // JOIN a group using code
-// router.post('/join', userAuth, async (req, res) => {
-//   try {
-//     const { groupCode } = req.body;
-    
-//     if (!groupCode || groupCode.length !== 6) {
-//       return res.status(400).json({ success: false, message: 'Valid 6-digit group code is required' });
-//     }
-
-//     // Get user details
-//     const user = await User.findById(req.userId);
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: 'User not found' });
-//     }
-
-//     // Find group
-//     const group = await Group.findOne({ groupCode });
-//     if (!group) {
-//       return res.status(404).json({ success: false, message: 'Group not found. Please check the code.' });
-//     }
-
-//     // Check if user is already a member
-//     const isMember = group.members.some(member => member.userId.toString() === req.userId);
-//     if (isMember) {
-//       return res.status(400).json({ success: false, message: 'You are already a member of this group' });
-//     }
-
-//     // Add user to group
-//     group.members.push({
-//       userId: req.userId,
-//       username: user.username
-//     });
-
-//     await group.save();
-
-//     res.status(200).json({ 
-//       success: true, 
-//       group,
-//       message: `Successfully joined ${group.groupName}!` 
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: 'Server error joining group' });
-//   }
-// });
-
-// // GET user's groups
-// router.get('/my-groups', userAuth, async (req, res) => {
-//   try {
-//     const groups = await Group.find({ 
-//       'members.userId': req.userId 
-//     }).sort({ createdAt: -1 });
-
-//     res.status(200).json({ success: true, groups });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: 'Server error fetching groups' });
-//   }
-// });
-
-// // GET leaderboard - Top 10 users by points
-// router.get('/leaderboard', async (req, res) => {
-//   try {
-//     const topUsers = await User.find()
-//       .select('username totalPoints')
-//       .sort({ totalPoints: -1 })
-//       .limit(10);
-
-//     const leaderboard = topUsers.map((user, index) => ({
-//       rank: index + 1,
-//       username: user.username,
-//       totalPoints: user.totalPoints || 0
-//     }));
-
-//     res.status(200).json({ success: true, leaderboard });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: 'Server error fetching leaderboard' });
-//   }
-// });
-
-// // GET group details by ID
-// router.get('/:groupId', userAuth, async (req, res) => {
-//   try {
-//     const group = await Group.findById(req.params.groupId);
-    
-//     if (!group) {
-//       return res.status(404).json({ success: false, message: 'Group not found' });
-//     }
-
-//     // Check if user is a member
-//     const isMember = group.members.some(member => member.userId.toString() === req.userId);
-//     if (!isMember) {
-//       return res.status(403).json({ success: false, message: 'You are not a member of this group' });
-//     }
-
-//     res.status(200).json({ success: true, group });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: 'Server error fetching group' });
-//   }
-// });
-
-// // LEAVE a group
-// router.post('/leave/:groupId', userAuth, async (req, res) => {
-//   try {
-//     const group = await Group.findById(req.params.groupId);
-    
-//     if (!group) {
-//       return res.status(404).json({ success: false, message: 'Group not found' });
-//     }
-
-//     // Remove user from members
-//     group.members = group.members.filter(member => member.userId.toString() !== req.userId);
-
-//     // Delete group if no members left
-//     if (group.members.length === 0) {
-//       await Group.findByIdAndDelete(req.params.groupId);
-//       return res.status(200).json({ success: true, message: 'Group deleted as no members remain' });
-//     }
-
-//     await group.save();
-//     res.status(200).json({ success: true, message: 'Left group successfully' });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ success: false, message: 'Server error leaving group' });
-//   }
-// });
-
-// export default router;
-import express from 'express';
-import Group from '../models/Group.js';
-import usermodal from '../models/usermodal.js'; // ✅ Fixed import - using your actual file name
-import userAuth from '../middleware/userAuth.js';
+// routes/groupRoutes.js
+import express from "express";
+import mongoose from "mongoose";
+import Group from "../models/Group.js";
+import usermodal from "../models/usermodal.js";
+import userAuth from "../middleware/userAuth.js";
 
 const router = express.Router();
 
-// Generate random 6-digit code
-const generateGroupCode = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+// Generate 6-digit group codes
+const generateGroupCode = () =>
+  Math.floor(100000 + Math.random() * 900000).toString();
 
-// CREATE a new group
-router.post('/create', userAuth, async (req, res) => {
+/* ----------------------------------------------------
+   LEADERBOARD  (KEEP ABOVE ALL /:groupId ROUTES)
+---------------------------------------------------- */
+router.get("/leaderboard", async (req, res) => {
+  try {
+    const groups = await Group.find().lean();
+
+    const leaderboard = groups
+      .map((g) => ({
+        id: g._id,
+        username: g.groupName,         // group ka naam show hoga
+        totalPoints: g.totalGroupPoints || 0,
+      }))
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .map((item, index) => ({
+        ...item,
+        rank: index + 1,
+      }))
+      .slice(0, 10);
+
+    return res.json({ success: true, leaderboard });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false });
+  }
+});
+
+
+
+/* ----------------------------------------------------
+   DAILY RESET — Safe isolated logic
+---------------------------------------------------- */
+router.put("/reset-daily", async (req, res) => {
+  try {
+    const groups = await Group.find();
+    const today = new Date().toDateString();
+
+    for (const g of groups) {
+      if (g.lastResetDate !== today) {
+        // reset daily completions
+        g.habits.forEach((h) => {
+          h.completions.forEach((c) => {
+            c.isDone = false;
+            c.doneAt = null;
+          });
+        });
+
+        // streak continuation
+        if (g.yesterdayCompleted === true) {
+          g.groupStreak += 1;
+        } else {
+          g.groupStreak = 0;
+        }
+
+        g.todayPoints = 0;
+        g.yesterdayCompleted = false;
+        g.lastResetDate = today;
+
+        await g.save();
+      }
+    }
+
+    return res.json({ success: true, message: "Daily reset done!" });
+  } catch (err) {
+    console.error("Daily reset error:", err);
+    return res.status(500).json({ success: false, message: "Reset failed" });
+  }
+});
+
+/* ----------------------------------------------------
+   CREATE GROUP
+---------------------------------------------------- */
+router.post("/create", userAuth, async (req, res) => {
   try {
     const { groupName } = req.body;
-    
-    if (!groupName) {
-      return res.status(400).json({ success: false, message: 'Group name is required' });
-    }
+    if (!groupName)
+      return res.status(400).json({ success: false, message: "Group name required" });
 
-    // Get user details - using usermodal as per your schema
-    const user = await usermodal.findById(req.userId).select('username');
-    
-    console.log('Found user:', user); // Debug log
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    const user = await usermodal.findById(req.userId).select("username");
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    if (!user.username) {
-      return res.status(400).json({ success: false, message: 'Username not found for user' });
-    }
-
-    // Generate unique group code
     let groupCode = generateGroupCode();
-    let existingGroup = await Group.findOne({ groupCode });
-    
-    // Ensure code is unique
-    while (existingGroup) {
+    while (await Group.findOne({ groupCode })) {
       groupCode = generateGroupCode();
-      existingGroup = await Group.findOne({ groupCode });
     }
 
-    // Create group with creator as first member
     const group = new Group({
       groupName,
       groupCode,
       createdBy: req.userId,
-      members: [{
-        userId: req.userId,
-        username: user.username
-      }]
+      members: [{ userId: req.userId, username: user.username }],
+      
     });
 
     await group.save();
 
-    res.status(201).json({ 
-      success: true, 
-      group,
-      message: `Group created successfully! Share code: ${groupCode}` 
-    });
+    return res.json({ success: true, group, message: "Group created!" });
   } catch (err) {
-    console.error('Create group error:', err);
-    res.status(500).json({ success: false, message: 'Server error creating group' });
+    console.error("Create group error:", err);
+    return res.status(500).json({ success: false, message: "Error creating group" });
   }
 });
 
-// JOIN a group using code
-router.post('/join', userAuth, async (req, res) => {
+/* ----------------------------------------------------
+   JOIN GROUP
+---------------------------------------------------- */
+router.post("/join", userAuth, async (req, res) => {
   try {
     const { groupCode } = req.body;
-    
-    if (!groupCode || groupCode.length !== 6) {
-      return res.status(400).json({ success: false, message: 'Valid 6-digit group code is required' });
-    }
+    if (!groupCode)
+      return res.status(400).json({ success: false, message: "Group code required" });
 
-    // Get user details - using usermodal as per your schema
-    const user = await usermodal.findById(req.userId).select('username');
-    
-    console.log('Found user for join:', user); // Debug log
-    
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+    const user = await usermodal.findById(req.userId).select("username");
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    if (!user.username) {
-      return res.status(400).json({ success: false, message: 'Username not found for user' });
-    }
-
-    // Find group
     const group = await Group.findOne({ groupCode });
-    if (!group) {
-      return res.status(404).json({ success: false, message: 'Group not found. Please check the code.' });
-    }
+    if (!group)
+      return res.status(404).json({ success: false, message: "Invalid group code" });
 
-    // Check if user is already a member
-    const isMember = group.members.some(member => member.userId.toString() === req.userId);
-    if (isMember) {
-      return res.status(400).json({ success: false, message: 'You are already a member of this group' });
-    }
+    if (group.members.some((m) => String(m.userId) === String(req.userId)))
+      return res.status(400).json({ success: false, message: "Already in group" });
 
-    // Add user to group
-    group.members.push({
-      userId: req.userId,
-      username: user.username
+    group.members.push({ userId: req.userId, username: user.username });
+
+    // Add existing habits to new member
+    group.habits.forEach((h) => {
+      h.completions.push({
+        userId: req.userId,
+        isDone: false,
+        doneAt: null,
+      });
     });
 
     await group.save();
 
-    res.status(200).json({ 
-      success: true, 
-      group,
-      message: `Successfully joined ${group.groupName}!` 
-    });
+    return res.json({ success: true, group, message: "Joined group!" });
   } catch (err) {
-    console.error('Join group error:', err);
-    res.status(500).json({ success: false, message: 'Server error joining group' });
+    console.error("Join group error:", err);
+    return res.status(500).json({ success: false, message: "Error joining group" });
   }
 });
 
-// GET user's groups
-router.get('/my-groups', userAuth, async (req, res) => {
+/* ----------------------------------------------------
+   GET MY GROUPS
+---------------------------------------------------- */
+router.get("/my-groups", userAuth, async (req, res) => {
   try {
-    const groups = await Group.find({ 
-      'members.userId': req.userId 
+    const groups = await Group.find({
+      "members.userId": req.userId,
     }).sort({ createdAt: -1 });
 
-    res.status(200).json({ success: true, groups });
+    return res.json({ success: true, groups });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error fetching groups' });
+    console.error("Get my groups error:", err);
+    return res.status(500).json({ success: false });
   }
 });
 
-// GET leaderboard - Top 10 users by points
-router.get('/leaderboard', async (req, res) => {
+/* ----------------------------------------------------
+   ADD HABIT
+---------------------------------------------------- */
+router.post("/:groupId/habits", userAuth, async (req, res) => {
   try {
-    const topUsers = await usermodal.find()
-      .select('username totalPoints')
-      .sort({ totalPoints: -1 })
-      .limit(10);
+    const { title } = req.body;
+    if (!title) return res.status(400).json({ message: "Title required" });
 
-    const leaderboard = topUsers.map((user, index) => ({
-      rank: index + 1,
-      username: user.username,
-      totalPoints: user.totalPoints || 0
-    }));
-
-    res.status(200).json({ success: true, leaderboard });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error fetching leaderboard' });
-  }
-});
-
-// GET group details by ID
-router.get('/:groupId', userAuth, async (req, res) => {
-  try {
     const group = await Group.findById(req.params.groupId);
-    
-    if (!group) {
-      return res.status(404).json({ success: false, message: 'Group not found' });
-    }
+    if (!group) return res.status(404).json({ message: "Group not found" });
 
-    // Check if user is a member
-    const isMember = group.members.some(member => member.userId.toString() === req.userId);
-    if (!isMember) {
-      return res.status(403).json({ success: false, message: 'You are not a member of this group' });
-    }
+    if (String(group.createdBy) !== String(req.userId))
+      return res.status(403).json({ message: "Only creator can add habits" });
 
-    res.status(200).json({ success: true, group });
+    const newHabit = {
+      title,
+      createdBy: req.userId,
+      completions: group.members.map((m) => ({
+        userId: m.userId,
+        isDone: false,
+        doneAt: null,
+      })),
+    };
+
+    group.habits.push(newHabit);
+    await group.save();
+
+    return res.json({ success: true, group });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error fetching group' });
+    console.error("Add habit error:", err);
+    return res.status(500).json({ success: false });
   }
 });
 
-// LEAVE a group
-router.post('/leave/:groupId', userAuth, async (req, res) => {
+/* ----------------------------------------------------
+   MARK HABIT DONE
+---------------------------------------------------- */
+router.post("/:groupId/habits/:habitIndex/complete", userAuth, async (req, res) => {
   try {
-    const group = await Group.findById(req.params.groupId);
-    
-    if (!group) {
-      return res.status(404).json({ success: false, message: 'Group not found' });
-    }
+    const { groupId, habitIndex } = req.params;
 
-    // Remove user from members
-    group.members = group.members.filter(member => member.userId.toString() !== req.userId);
+    const group = await Group.findById(groupId);
+    if (!group) return res.status(404).json({ message: "Group not found" });
 
-    // Delete group if no members left
-    if (group.members.length === 0) {
-      await Group.findByIdAndDelete(req.params.groupId);
-      return res.status(200).json({ success: true, message: 'Group deleted as no members remain' });
-    }
+    const index = Number(habitIndex);
+    if (isNaN(index) || index < 0 || index >= group.habits.length)
+      return res.status(400).json({ message: "Invalid habit index" });
+
+    const habit = group.habits[index];
+
+    const entry = habit.completions.find(
+      (c) => String(c.userId) === String(req.userId)
+    );
+
+    if (!entry)
+      return res.status(400).json({ message: "You are not part of this habit" });
+
+    entry.isDone = true;
+    entry.doneAt = new Date();
+
+    // Recalculate daily total
+    let points = 0;
+    group.habits.forEach((h) =>
+      h.completions.forEach((c) => {
+        if (c.isDone) points += 5;
+      })
+    );
+
+    group.totalGroupPoints = points;
 
     await group.save();
-    res.status(200).json({ success: true, message: 'Left group successfully' });
+
+    return res.json({ success: true, group });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error leaving group' });
+    console.error("Complete habit error:", err);
+    return res.status(500).json({ success: false });
+  }
+});
+
+/* ----------------------------------------------------
+   GROUP DETAILS
+---------------------------------------------------- */
+router.get("/:groupId", userAuth, async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.groupId))
+      return res.status(400).json({ message: "Invalid group ID" });
+
+    const group = await Group.findById(req.params.groupId);
+    if (!group) return res.status(404).json({ message: "Group not found" });
+
+    const isMember = group.members.some(
+      (m) => String(m.userId) === String(req.userId)
+    );
+
+    if (!isMember) return res.status(403).json({ message: "Not a member" });
+
+    return res.json({ success: true, group });
+  } catch (err) {
+    console.error("Get group error:", err);
+    return res.status(500).json({ success: false });
   }
 });
 

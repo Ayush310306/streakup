@@ -68,9 +68,10 @@ import express from 'express';
 import Habit from '../models/Habit.js';
 import usermodal from '../models/usermodal.js'; // ✅ Fixed - was User.js
 import userAuth from '../middleware/userAuth.js';
-
+import { getUserData } from '../controllers/usercontroller.js';
 const router = express.Router();
 
+router.get('/data', userAuth, getUserData);
 // Helper to format a date to 'YYYY-MM-DD'
 const formatDate = (date) => date.toISOString().split('T')[0];
 

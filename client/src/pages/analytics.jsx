@@ -249,7 +249,7 @@ const Analytics = () => {
 
   // --- NAVIGATION BAR ---
   const Navigation = () => (
-    <nav className="navbar">
+    <nav className="navbar" style={{marginLeft:"-20px",marginRight:"-20px",marginTop: '-20px',marginBottom:'10px'}}>
       <div className="nav-left">
         <div className="logo-box">
           <Flame size={20} color="white" />
@@ -304,7 +304,7 @@ const Analytics = () => {
         <Navigation />
         <div style={{ textAlign: "center", paddingTop: "100px" }}>
           <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#aaa", marginBottom: "1rem" }}>No Habits Found</h2>
-          <p style={{ color: "#666" }}>Start adding habits to see your analytics!</p>
+          <p style={{ color: "#666" }}>Start adding habits to see your analytics! Remember to login/signup first !!</p>
         </div>
       </div>
     );

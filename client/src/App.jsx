@@ -85,9 +85,11 @@ import EmailVerify from "./pages/emailVerify";
 import Habits from "./pages/Habit";
 import Challenge from "./pages/Challenge";
 import Analytics from "./pages/analytics"; 
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   return (
+    <>
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
@@ -97,6 +99,9 @@ const App = () => {
       <Route path="/challenges" element={<Challenge />} /> {/* ✅ NEW */}
       <Route path="/analytics" element={<Analytics />} />
     </Routes>
+    <ToastContainer/>
+    </>
+    
   );
 };
 

@@ -639,6 +639,7 @@
 // export default AddHabit;
 import React, { useState } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 // List of all categories
 const categories = [
@@ -682,13 +683,13 @@ const AddHabit = ({ fetchHabits }) => {
         setTargetFrequency(frequencyOptions[0].value);
         setWebsiteLink(""); // Reset the link field
         fetchHabits();
-        alert(`Habit added: ${res.data.habit.title}`);
+        toast.success(`Habit added: ${res.data.habit.title}`);
       } else {
-        alert("Failed to add habit. Check console.");
+        toast.error("Failed to add habit. Check console.");
       }
     } catch (err) {
       console.error("Failed to add habit", err.response?.data || err.message);
-      alert("Failed to add habit. Check console for details.");
+      toast.error("Failed to add habit. please login/signup to add");
     }
   };
 
